@@ -1,0 +1,209 @@
+// Splash overlay — sits on top of the live 3D scene. Pointer-events
+// transparent except for the corner chips, so a drag anywhere on the
+// playfield starts the joystick (and the game).
+.bp-splash {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  color: #f4f4f4;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  // Subtle vignette so the title and chips read cleanly against any
+  // night palette behind them.
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgba(0,0,0,.55) 0%, rgba(0,0,0,.10) 45%, rgba(0,0,0,0) 65%),
+    radial-gradient(120% 60% at 50% 100%, rgba(0,0,0,.45) 0%, rgba(0,0,0,.05) 50%, rgba(0,0,0,0) 70%);
+
+  &__title {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 56px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: .92;
+    text-align: center;
+    letter-spacing: .04em;
+    font-family: 'Cinzel', 'Space Grotesk', serif;
+    font-weight: 900;
+    font-size: 60px;
+    text-shadow: 0 4px 24px rgba(0,0,0,.7), 0 0 26px rgba(220,80,140,.35);
+  }
+  &__title-mark {
+    display: block;
+  }
+  &__title-mark--primary {
+    color: #f4e4e4;
+  }
+  &__title-mark--accent {
+    color: #ff5b8a;
+    text-shadow: 0 4px 26px rgba(0,0,0,.75), 0 0 32px rgba(255,80,140,.55);
+    letter-spacing: .08em;
+  }
+
+  &__best {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 184px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,210,170,.85);
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    text-shadow: 0 2px 8px rgba(0,0,0,.7);
+    white-space: nowrap;
+  }
+
+  // -------- Top corner chips --------
+  &__chip,
+  &__champion {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 16px);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px 8px;
+    background: rgba(20, 12, 22, .68);
+    border: 1px solid rgba(255, 255, 255, .14);
+    border-radius: 999px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 6px 18px rgba(0,0,0,.45);
+    pointer-events: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: #f4f4f4;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    touch-action: manipulation;
+    transition: transform .12s ease, background .12s ease, border-color .12s ease;
+
+    &:active {
+      transform: scale(.96);
+      background: rgba(36, 22, 40, .78);
+      border-color: rgba(255, 255, 255, .26);
+    }
+  }
+  &__chip--loadout {
+    left: 14px;
+  }
+  &__chip-eyebrow {
+    color: rgba(255, 220, 240, .55);
+    font-size: 8.5px;
+    letter-spacing: .22em;
+  }
+  &__chip-name {
+    color: #ffd6e6;
+    font-weight: 800;
+  }
+  &__chip-edit {
+    color: rgba(255, 220, 240, .65);
+    font-size: 11px;
+    margin-left: 2px;
+  }
+
+  &__champion {
+    right: 14px;
+    max-width: 200px;
+  }
+  &__champion-trophy {
+    color: #ffd060;
+    font-size: 12px;
+    line-height: 1;
+    filter: drop-shadow(0 0 6px rgba(255, 208, 96, .55));
+  }
+  &__champion-name {
+    color: #ffe9a1;
+    font-weight: 800;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  &__champion-score {
+    color: rgba(255,255,255,.7);
+    font-weight: 600;
+    font-size: 9px;
+    letter-spacing: .12em;
+  }
+  &__champion--empty {
+    .bp-splash__champion-trophy {
+      color: rgba(255,210,140,.8);
+    }
+  }
+
+  // -------- Gesture demo (phantom thumb) --------
+  // Anchored to lower-center; absolute pointer-events: none so the user's
+  // own touch lands on the canvas/window and starts the joystick.
+  &__demo {
+    position: absolute;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 90px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    pointer-events: none;
+  }
+  &__demo-ring {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 2px dashed rgba(255, 255, 255, .25);
+    box-shadow: 0 0 32px rgba(255, 80, 140, .12) inset, 0 6px 24px rgba(0,0,0,.4);
+    animation: bp-splash-ring-pulse 2.2s ease-in-out infinite;
+  }
+  &__demo-thumb {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    margin: -22px 0 0 -22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffe2eb 0%, #ff7aa6 55%, #c2305a 100%);
+    box-shadow:
+      0 0 18px rgba(255, 90, 140, .65),
+      0 6px 14px rgba(0,0,0,.55),
+      inset 0 -4px 8px rgba(0,0,0,.35);
+    animation: bp-splash-thumb-drag 2.2s ease-in-out infinite;
+  }
+  &__demo-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .26em;
+    color: rgba(255, 200, 220, .85);
+    text-shadow: 0 2px 8px rgba(0,0,0,.7);
+    text-transform: uppercase;
+    white-space: nowrap;
+    animation: bp-splash-label-blink 2.2s ease-in-out infinite;
+  }
+}
+
+@keyframes bp-splash-thumb-drag {
+  0%   { transform: translate(-18px, -10px); }
+  25%  { transform: translate( 16px, -14px); }
+  50%  { transform: translate( 22px,  12px); }
+  75%  { transform: translate(-14px,  16px); }
+  100% { transform: translate(-18px, -10px); }
+}
+
+@keyframes bp-splash-ring-pulse {
+  0%, 100% { box-shadow: 0 0 32px rgba(255, 80, 140, .12) inset, 0 6px 24px rgba(0,0,0,.4); transform: scale(1); }
+  50%      { box-shadow: 0 0 44px rgba(255, 80, 140, .26) inset, 0 6px 24px rgba(0,0,0,.4); transform: scale(1.04); }
+}
+
+@keyframes bp-splash-label-blink {
+  0%, 100% { opacity: .9; }
+  50%      { opacity: .55; }
+}

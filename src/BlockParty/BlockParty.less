@@ -1,0 +1,1139 @@
+.ln {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(120% 80% at 50% 100%, #1a1018 0%, #0a0508 50%, #02010a 100%);
+  overflow: hidden;
+  color: #f4f4f4;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  touch-action: none;
+
+  &__canvas { position: absolute; inset: 0; }
+
+  &__fog {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    mix-blend-mode: multiply;
+    transition: background 80ms linear;
+    // Breathe in sync with the 3D block-party (~5.5s period). Scaling the
+    // whole gradient makes the bright "see-through" hole pulse larger and
+    // smaller — matches the block-party flame waxing/waning.
+    animation: ln-fog-breath 5.5s ease-in-out infinite alternate;
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+  &__hud {
+    position: absolute;
+    top: env(safe-area-inset-top, 8px);
+    left: 0;
+    right: 0;
+    padding: 8px 16px;
+    z-index: 10;
+    pointer-events: none;
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  }
+  &__topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 18px 9px;
+    background: linear-gradient(135deg, rgba(28,18,28,.55), rgba(12,8,18,.55));
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: 0 8px 28px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
+    border-radius: 18px;
+    pointer-events: auto;
+  }
+  &__topbar-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    &--right { align-items: flex-end; }
+  }
+  &__topbar-mid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  &__topbar-num {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    color: #fff5dd;
+    text-shadow: 0 0 14px rgba(255,180,80,.25);
+    &--small { font-size: 18px; }
+  }
+  &__topbar-caption {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: rgba(220, 200, 170, .55);
+    font-weight: 500;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  // Time countdown gets a red urgency tint when low
+  &__topbar-num--urgent {
+    color: #ff7a55;
+    text-shadow: 0 0 14px rgba(255, 120, 80, .45);
+    animation: ln-urgent-pulse 0.9s ease-in-out infinite alternate;
+  }
+
+  // Level pill — under the HUD topbar
+  &__level-pill {
+    margin: 8px auto 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px 5px;
+    background: rgba(28,18,28,.55);
+    border: 1px solid rgba(255,200,130,.18);
+    border-radius: 999px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 14px rgba(0,0,0,.4);
+    pointer-events: auto;
+  }
+  &__level-pill-num {
+    font-family: 'Cinzel', 'Times New Roman', serif;
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: .12em;
+    color: #ffd28a;
+  }
+  &__level-pill-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: .20em;
+    text-transform: uppercase;
+    color: rgba(220, 200, 170, .75);
+  }
+  // wrap level pill in centered flex (the HUD parent is full-width, so the
+  // inline-flex element doesn't center automatically without help)
+  &__hud {
+    text-align: center;
+  }
+
+  // Exit-summon progress chip (under the level pill)
+  &__exit-progress {
+    margin: 6px auto 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px 5px;
+    background: rgba(28,18,28,.45);
+    border: 1px solid rgba(180, 120, 220, .22);
+    border-radius: 999px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    pointer-events: auto;
+    color: rgba(220, 200, 240, .85);
+
+    &--open {
+      border-color: rgba(200, 120, 255, .55);
+      animation: ln-exit-open-pulse 1.4s ease-out 3;
+    }
+  }
+  &__exit-progress-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #c878ff;
+    box-shadow: 0 0 8px rgba(200, 120, 255, .65);
+    &--open {
+      animation: ln-exit-dot-pulse 1.0s ease-in-out infinite alternate;
+    }
+  }
+  &__exit-progress-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    line-height: 1;
+    b {
+      color: #f0d8ff;
+      font-weight: 700;
+    }
+  }
+
+  &__exit-reveal-flash {
+    position: absolute;
+    inset: 0;
+    z-index: 14;
+    pointer-events: none;
+    background: radial-gradient(60% 60% at 50% 50%, rgba(200, 120, 255, 0) 0%, rgba(200, 120, 255, .12) 50%, rgba(200, 120, 255, .28) 75%, rgba(0,0,0,0) 100%);
+    animation: ln-exit-reveal-flash .9s ease-out forwards;
+  }
+
+  // Level intro overlay — appears at start of each level
+  &__level-intro {
+    position: absolute;
+    inset: 0;
+    z-index: 14;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    text-align: center;
+    animation: ln-level-intro 1700ms cubic-bezier(.22,.61,.36,1) forwards;
+  }
+  &__level-intro-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    color: rgba(255, 200, 140, .85);
+    margin-bottom: 8px;
+    text-shadow: 0 4px 18px rgba(255, 150, 60, .55);
+  }
+  &__level-intro-name {
+    font-family: 'Cinzel', 'Times New Roman', serif;
+    font-size: clamp(40px, 11vw, 70px);
+    font-weight: 900;
+    letter-spacing: .08em;
+    line-height: 1;
+    background: linear-gradient(180deg, #fff2d6 0%, #ffd28a 70%, #cd8e54 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 8px 24px rgba(255, 150, 60, .45));
+    margin-bottom: 14px;
+  }
+  &__level-intro-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: rgba(200, 220, 240, .60);
+  }
+
+  // Level cleared — between-level overlay
+  &__level-clear {
+    position: absolute;
+    inset: 0;
+    z-index: 16;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: radial-gradient(60% 60% at 50% 50%, rgba(40, 90, 140, .55) 0%, rgba(8, 12, 22, .92) 80%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: ln-clear-fade 1900ms ease-out forwards;
+  }
+  &__level-clear-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .35em;
+    color: rgba(170, 220, 255, .85);
+    margin-bottom: 12px;
+  }
+  &__level-clear-bonus {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 80px;
+    font-weight: 800;
+    line-height: 1;
+    color: transparent;
+    background: linear-gradient(180deg, #b8e8ff 0%, #5aa8ff 70%, #2a78c8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 8px 24px rgba(90, 168, 255, .35));
+  }
+  &__level-clear-total {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .30em;
+    color: rgba(220, 235, 250, .80);
+    margin: 18px 0 14px;
+  }
+  &__level-clear-next {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .25em;
+    color: rgba(180, 200, 220, .55);
+  }
+
+  // Victory screen — final-level cleared
+  &__victory {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    background: radial-gradient(80% 80% at 50% 30%, rgba(255, 180, 80, .35) 0%, rgba(20, 12, 8, .94) 80%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    text-align: center;
+  }
+  &__victory-eyebrow {
+    font-family: 'Cinzel', 'Times New Roman', serif;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: .45em;
+    color: #ffd28a;
+    margin-bottom: 18px;
+    text-shadow: 0 4px 18px rgba(255, 150, 60, .55);
+  }
+
+  &__watermark {
+    position: absolute;
+    left: 16px;
+    bottom: calc(env(safe-area-inset-bottom, 16px) + 16px);
+    height: 52px;
+    width: auto;
+    opacity: .75;
+    pointer-events: auto;
+    filter: drop-shadow(0 4px 14px rgba(0,0,0,.5));
+    z-index: 5;
+  }
+
+  &__joystick {
+    position: absolute;
+    pointer-events: none;
+    z-index: 5;
+    transform: translate(-50%, -50%);
+    &__ring {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid rgba(255,255,255,.55);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(3px);
+      position: relative;
+    }
+    &__stick {
+      position: absolute;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.75);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: transform 60ms linear;
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    }
+  }
+
+  &__gameover {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    z-index: 20;
+    background: radial-gradient(80% 80% at 50% 30%, rgba(40, 90, 140, .55) 0%, rgba(5,12,25,.92) 80%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  }
+  &__gameover-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: rgba(255, 110, 110, .85);
+    font-weight: 600;
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  &__cta {
+    background: linear-gradient(135deg, #ffe17a 0%, #ff9844 60%, #ff6b3a 100%);
+    color: #1a1a1a;
+    border: none;
+    padding: 16px 38px;
+    border-radius: 999px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow:
+      0 16px 40px rgba(255, 150, 60, .42),
+      inset 0 1px 0 rgba(255, 255, 255, .6);
+    pointer-events: auto;
+    transition: transform .15s ease;
+  }
+  &__cta:active { transform: translateY(2px); }
+  &__final-score {
+    font-family: 'Baloo 2', sans-serif;
+    // Responsive cap — endless lets the score climb past 6-7 digits and
+    // the old fixed 128px clipped on every phone (6 digits × 128 × ~0.6
+    // = ~460px > viewport). clamp() lets desktop keep the big hero
+    // numeral while mobile shrinks to fit.
+    font-size: clamp(56px, 18vw, 128px);
+    font-weight: 800;
+    margin: 0;
+    line-height: 1.1;
+    letter-spacing: -.01em;
+    white-space: nowrap;
+    // Internal padding gives the filter drop-shadow + Baloo 2 glyph ink
+    // (which extends past the advance width on chars like "2") room to render
+    // without being clipped by the flex-shrunk box.
+    padding: 0 .12em;
+    max-width: 100%;
+    background: linear-gradient(180deg, #ffe17a 0%, #ff9844 70%, #ff6b3a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 14px 30px rgba(255, 150, 60, .3));
+  }
+  &__final {
+    margin: 14px 0 32px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: rgba(220, 235, 250, .7);
+  }
+  &__leaderboard-btn {
+    margin-top: 16px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.18);
+    color: #fff;
+    padding: 12px 26px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  // Pickup +N pellets — drift up + fade. Container anchors at screen center
+  // because the camera follows the player.
+  &__pellets {
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    pointer-events: none;
+    z-index: 12;
+  }
+  &__pellet {
+    position: absolute;
+    font-family: 'Baloo 2', 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 32px;
+    line-height: 1;
+    pointer-events: none;
+    animation: ln-pellet-up 700ms cubic-bezier(.22,.61,.36,1) forwards;
+    color: #ffd64a;
+    text-shadow: 0 2px 12px rgba(0,0,0,.85);
+    &--gold  { color: #ffd64a; }
+    &--red   { color: #ff9a6a; }
+    &--green { color: #6cff9e; }
+    &--blue  { color: #6fc6ff; }
+  }
+
+  &__hit-flash {
+    position: absolute;
+    inset: 0;
+    z-index: 15;
+    pointer-events: none;
+    background: radial-gradient(70% 70% at 50% 50%, rgba(255, 50, 40, .55) 0%, rgba(180, 20, 10, .30) 35%, rgba(40, 0, 0, 0) 80%);
+    animation: ln-hit-flash .6s ease-out forwards;
+  }
+}
+
+// 3-heart HP row — now nested inside .bp__hud-main, so static layout.
+.bp__hearts {
+  display: inline-flex;
+  gap: 2px;
+  font-size: 18px;
+  line-height: 1;
+  pointer-events: none;
+}
+.bp__heart {
+  color: #ff3a4a;
+  filter: drop-shadow(0 0 6px rgba(255, 60, 80, 0.55));
+  transition: color 180ms ease, filter 180ms ease, transform 180ms ease;
+}
+.bp__heart--gone {
+  color: rgba(255, 255, 255, 0.15);
+  filter: none;
+  transform: scale(0.85);
+}
+
+// Current weapon chip — sits to the right of the hearts row.
+.bp__weapon {
+  position: absolute;
+  top: 52px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 12;
+  pointer-events: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(20, 14, 26, 0.72);
+  border: 1.5px solid var(--weapon-tint, #888);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .14em;
+  color: var(--weapon-tint, #fff);
+  text-shadow: 0 0 8px rgba(0, 0, 0, .75);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--weapon-tint, #fff) 30%, transparent);
+}
+.bp__weapon-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--weapon-tint, #fff);
+  box-shadow: 0 0 8px var(--weapon-tint, #fff);
+}
+.bp__weapon-name { display: inline-block; }
+.bp__weapon-stars {
+  display: inline-block;
+  margin-left: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--weapon-tint, #fff);
+  text-shadow: 0 0 8px var(--weapon-tint, #fff);
+}
+
+// ===================================================================
+// New consolidated HUD (Phase 8) — 3-tier priority
+// ===================================================================
+
+// Main pill: hearts | score | weapon — sits top-left, the only spot the
+// player needs to look at for "am I alive / how am I doing / what am I
+// shooting".
+.bp__hud-main {
+  position: absolute;
+  top: 16px;
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(8, 6, 14, 0.62);
+  border: 1px solid rgba(255, 230, 200, 0.18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: none;
+  z-index: 12;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+.bp__hud-score {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  color: rgba(255, 240, 220, 0.96);
+  font-variant-numeric: tabular-nums;
+}
+.bp__hud-weapon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1.2px solid var(--weapon-tint, #fff);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  background: rgba(20, 14, 26, 0.55);
+}
+.bp__hud-weapon-name { color: var(--weapon-tint, #fff); }
+.bp__hud-weapon-stars {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--weapon-tint, #fff);
+  text-shadow: 0 0 8px var(--weapon-tint, #fff);
+}
+
+// XP bar — slim, directly under the main pill. No label, just the fill +
+// a small LVL N over the fill so the player doesn't lose the level info.
+.bp__hud-xp {
+  position: absolute;
+  top: 64px;
+  left: 14px;
+  width: 220px;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 240, 200, 0.16);
+  overflow: hidden;
+  z-index: 12;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+.bp__hud-xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7fffa8 0%, #4cf0a8 100%);
+  box-shadow: 0 0 8px rgba(80, 255, 168, 0.6);
+  transition: width 180ms ease;
+}
+.bp__hud-xp-label {
+  position: absolute;
+  right: 8px;
+  top: -1px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  color: rgba(255, 240, 200, 0.85);
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
+}
+
+// Edge label — top-right corner: NIGHT + goal + small kills counter.
+.bp__hud-corner {
+  position: absolute;
+  top: 16px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  z-index: 12;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+}
+.bp__hud-corner-night {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: .14em;
+  color: rgba(255, 240, 220, 0.92);
+}
+.bp__hud-corner-goal {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: #ffd060;
+  &--open {
+    color: #f0d8ff;
+    text-shadow: 0 0 10px rgba(200, 120, 255, 0.85);
+    animation: bp-goal-glow 1.6s ease-in-out infinite;
+  }
+}
+.bp__hud-corner-kills {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .12em;
+  color: rgba(220, 210, 200, 0.55);
+}
+
+// In-game champion pill — only place the player can see who's #1 once
+// they've started a run (splash never comes back). Dark glass surface so
+// it reads against the night palette like the rest of the HUD, with a
+// gold crown SVG + circular avatar + champion name in front. No score —
+// the score lives on the splash pill / in the full leaderboard.
+.bp__champion-pill {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 92px);
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 5px;
+  background: rgba(20, 12, 22, .68);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .45);
+  pointer-events: auto;
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #f4f4f4;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+  z-index: 12;
+  max-width: 200px;
+  transition: transform .12s ease, background .12s ease;
+
+  &:active {
+    transform: scale(.96);
+    background: rgba(36, 22, 40, .82);
+  }
+}
+// Gold crown SVG glyph — Crossy Road / Sky Leap accent. Solid gold fill
+// with a warm-brown stroke so it pops against the dark pill but doesn't
+// feel like a UI icon.
+.bp__crown {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: block;
+  path {
+    fill: #ffcf4d;
+    stroke: rgba(120, 70, 10, .85);
+    stroke-width: 1.4;
+    stroke-linejoin: round;
+  }
+  filter: drop-shadow(0 0 4px rgba(255, 207, 77, .35));
+}
+// Circular avatar — 22px to match the pill's height. Real image when
+// head_url is present, otherwise an initial in a teal fallback circle.
+.bp__champion-pill-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(150deg, #ff85bd, #ec3a86);
+  border: 1.5px solid rgba(255, 255, 255, .85);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .4);
+  overflow: hidden;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+.bp__champion-pill-name {
+  color: #ffe9a1;
+  font-weight: 700;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Night kill-goal chip — replaces the old timer. Sits under the N1/N2/N3
+// pill. "FIND EXIT" variant glows violet once the beacon has spawned.
+.bp__goal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(15, 11, 22, 0.62);
+  border: 1px solid rgba(255, 230, 180, 0.30);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: rgba(255, 240, 220, 0.85);
+  text-transform: uppercase;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.65);
+  pointer-events: none;
+  b { color: #ffd060; font-weight: 800; }
+  &--open {
+    border-color: #c878ff;
+    color: #f0d8ff;
+    background: rgba(40, 24, 60, 0.78);
+    box-shadow: 0 0 18px rgba(200, 120, 255, 0.45);
+    animation: bp-goal-glow 1.8s ease-in-out infinite;
+  }
+}
+.bp__goal-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c878ff;
+  box-shadow: 0 0 10px #c878ff;
+}
+@keyframes bp-goal-glow {
+  0%, 100% { box-shadow: 0 0 14px rgba(200, 120, 255, 0.40); }
+  50%      { box-shadow: 0 0 28px rgba(200, 120, 255, 0.85); }
+}
+
+// Exit-open toast — large violet eyebrow that pulses in once when the
+// beacon spawns; fades automatically after a few seconds.
+.bp__exit-toast {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 26px;
+  border-radius: 14px;
+  background: rgba(8, 4, 14, 0.78);
+  border: 2px solid #c878ff;
+  box-shadow: 0 0 36px rgba(200, 120, 255, 0.65);
+  z-index: 25;
+  pointer-events: none;
+  animation: bp-exit-toast 3.2s ease-out forwards;
+}
+.bp__exit-toast-eyebrow {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: .26em;
+  color: #f0d8ff;
+  text-shadow: 0 0 14px rgba(200, 120, 255, 0.85);
+}
+.bp__exit-toast-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .18em;
+  color: rgba(220, 200, 230, 0.85);
+  text-transform: uppercase;
+}
+@keyframes bp-exit-toast {
+  0%   { opacity: 0; transform: translate(-50%, 24px) scale(0.92); }
+  12%  { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  80%  { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -8px) scale(0.96); }
+}
+
+// Elite-incoming toast — same anchor + pop pattern as the exit toast but
+// in crimson, so it reads as warning instead of reward.
+.bp__elite-toast {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 26px;
+  border-radius: 14px;
+  background: rgba(20, 4, 6, 0.82);
+  border: 2px solid #ff3050;
+  box-shadow: 0 0 36px rgba(255, 60, 80, 0.65);
+  z-index: 25;
+  pointer-events: none;
+  animation: bp-elite-toast 3.2s ease-out forwards;
+}
+.bp__elite-toast-eyebrow {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: .26em;
+  color: #ffd6d6;
+  text-shadow: 0 0 14px rgba(255, 60, 80, 0.85);
+}
+.bp__elite-toast-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .18em;
+  color: rgba(255, 200, 200, 0.85);
+  text-transform: uppercase;
+}
+@keyframes bp-elite-toast {
+  0%   { opacity: 0; transform: translate(-50%, -16px) scale(0.92); }
+  10%  { opacity: 1; transform: translate(-50%, 0) scale(1.04); }
+  18%  { transform: translate(-50%, 0) scale(1); }
+  82%  { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -8px) scale(0.96); }
+}
+
+// Weapon toast — sits in the same vertical slot as the perk toast, fades
+// out after a couple of seconds. Distinct headline (EQUIPPED vs LEVEL UP).
+.bp__weapon-toast {
+  position: absolute;
+  top: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 18px 8px;
+  border-radius: 14px;
+  background: rgba(8, 6, 12, 0.85);
+  border: 1.5px solid var(--weapon-tint, #fff);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--weapon-tint, #fff) 45%, transparent);
+  font-family: 'Space Grotesk', sans-serif;
+  z-index: 25;
+  pointer-events: none;
+  animation: bp-perk-toast 2.4s ease-out forwards;
+}
+.bp__weapon-toast-headline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .26em;
+  color: rgba(255, 240, 220, 0.75);
+  margin-bottom: 2px;
+}
+.bp__weapon-toast-sub {
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: .14em;
+  color: var(--weapon-tint, #fff);
+}
+
+// Weapon downgrade toast — same anchor + size as the upgrade toast but
+// in crimson, fires when a hit eats a weapon level instead of HP
+// (weapon-as-armor late-game equalizer).
+.bp__weapon-downgrade {
+  position: absolute;
+  top: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 18px 8px;
+  border-radius: 14px;
+  background: rgba(20, 4, 6, 0.88);
+  border: 1.5px solid #ff3050;
+  box-shadow: 0 0 26px rgba(255, 60, 80, 0.55);
+  font-family: 'Space Grotesk', sans-serif;
+  z-index: 25;
+  pointer-events: none;
+  animation: bp-perk-toast 2.4s ease-out forwards;
+}
+.bp__weapon-downgrade-headline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .26em;
+  color: rgba(255, 200, 200, 0.85);
+  margin-bottom: 2px;
+}
+.bp__weapon-downgrade-sub {
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: .14em;
+  color: #ff5070;
+}
+
+// XP bar — sits under the hearts row. Compact pill with the level number
+// on the left and a thin progress track on the right.
+.bp__xp {
+  position: absolute;
+  top: 88px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 12;
+  pointer-events: none;
+  font-family: 'JetBrains Mono', monospace;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+.bp__xp-level {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  color: rgba(255, 230, 200, .92);
+}
+.bp__xp-track {
+  width: 110px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 240, 200, 0.18);
+  overflow: hidden;
+}
+.bp__xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7fffa8 0%, #4cf0a8 80%, #4cf0a8 100%);
+  box-shadow: 0 0 8px rgba(80, 255, 168, 0.6);
+  border-radius: 3px;
+  transition: width 180ms ease;
+}
+
+// Perk modal — pauses the run and surfaces 3 cards. Dimmed full-screen
+// backdrop, gold eyebrow, 3 stacked cards on phone widths / 3 horizontal
+// on wider screens.
+.bp__perk-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  background: rgba(8, 6, 12, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: bp-perk-fade .25s ease-out both;
+}
+.bp__perk-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .26em;
+  color: #ffce4a;
+  text-shadow: 0 0 12px rgba(255, 200, 90, .65);
+}
+.bp__perk-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  color: #fff;
+  text-shadow: 0 2px 16px rgba(0,0,0,.6);
+  margin-bottom: 6px;
+}
+.bp__perk-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(360px, 92%);
+}
+.bp__perk-card {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(20, 14, 26, 0.85);
+  border: 2px solid var(--perk-tint, #888);
+  color: rgba(255, 240, 220, 0.95);
+  font-family: 'Space Grotesk', sans-serif;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, .55),
+    inset 0 1px 0 rgba(255, 255, 255, .08);
+  transition: transform .12s ease, box-shadow .12s ease, background .14s ease;
+  &:active {
+    transform: translateY(2px);
+    background: rgba(40, 28, 50, 0.95);
+  }
+}
+.bp__perk-card-label {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: .10em;
+  color: var(--perk-tint, #fff);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--perk-tint, #fff) 50%, transparent);
+}
+.bp__perk-card-desc {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  color: rgba(230, 220, 200, 0.78);
+  text-transform: uppercase;
+}
+// Perk toast — appears on perk auto-pickup, fades out after a couple of
+// seconds. Centered top, doesn't pause the run.
+.bp__perk-toast {
+  position: absolute;
+  top: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(8, 6, 12, 0.85);
+  border: 1.5px solid var(--perk-tint, #fff);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--perk-tint, #fff) 45%, transparent);
+  font-family: 'Space Grotesk', sans-serif;
+  z-index: 25;
+  pointer-events: none;
+  animation: bp-perk-toast 2.4s ease-out forwards;
+}
+.bp__perk-toast-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--perk-tint, #fff);
+  box-shadow: 0 0 10px var(--perk-tint, #fff);
+}
+.bp__perk-toast-label {
+  font-weight: 800;
+  letter-spacing: .14em;
+  color: var(--perk-tint, #fff);
+  font-size: 14px;
+}
+.bp__perk-toast-desc {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: rgba(255, 240, 220, 0.85);
+  text-transform: uppercase;
+}
+@keyframes bp-perk-toast {
+  0%   { opacity: 0; transform: translate(-50%, 12px) scale(0.94); }
+  12%  { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  80%  { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -8px) scale(0.96); }
+}
+
+@keyframes bp-perk-fade {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ln-pellet-up {
+  0%   { opacity: 0; transform: translate(-50%, 8px) scale(.7); }
+  20%  { opacity: 1; transform: translate(-50%, -8px) scale(1.20); }
+  100% { opacity: 0; transform: translate(-50%, -70px) scale(.95); }
+}
+@keyframes ln-hit-flash {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes ln-fog-breath {
+  0%   { transform: scale(.88); }
+  100% { transform: scale(1.18); }
+}
+@keyframes ln-urgent-pulse {
+  0%   { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+@keyframes ln-level-intro {
+  0%   { opacity: 0; transform: translateY(8px); }
+  20%  { opacity: 1; transform: translateY(0); }
+  78%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+@keyframes ln-clear-fade {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes ln-exit-open-pulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(200, 120, 255, 0); }
+  50%      { box-shadow: 0 0 16px rgba(200, 120, 255, .55); }
+}
+@keyframes ln-exit-dot-pulse {
+  0%   { transform: scale(1);   box-shadow: 0 0 8px rgba(200, 120, 255, .65); }
+  100% { transform: scale(1.4); box-shadow: 0 0 18px rgba(200, 120, 255, .95); }
+}
+@keyframes ln-exit-reveal-flash {
+  0%   { opacity: 0; }
+  20%  { opacity: 1; }
+  100% { opacity: 0; }
+}

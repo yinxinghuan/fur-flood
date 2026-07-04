@@ -258,10 +258,10 @@ export function BlockParty() {
             target_user_id: beaten.id,
             image: {
               ref_url: 'https://yinxinghuan.github.io/games/posters/fur-flood.png',
-              prompt: 'neon-lit night street with cops and zombies, top-down arcade shooter',
+              prompt: 'cozy living room arcade survival game with a cat dodging robot vacuums and toy vehicles',
             },
             message: {
-              template: `{sender_name} just beat your record — ${Math.round(myScore)} on BLOCK PARTY.`,
+              template: `{sender_name} just beat your record - ${Math.round(myScore)} on Fur Flood.`,
               variables: ['sender_name'],
             },
           },
